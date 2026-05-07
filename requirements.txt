@@ -1,0 +1,38 @@
+Django==5.0.1
+django-environ==0.11.2
+psycopg2-binary==2.9.9
+python-decouple==3.8
+cryptography==41.0.7
+
+# Telegram Bot
+hydrogram==0.19.5
+tgcrypto==1.2.5
+
+# Async & Workers
+taskiq==0.11.1
+taskiq-redis==0.5.0
+redis==5.0.1
+httpx==0.25.2
+aioredis==2.0.1
+
+# Monitoring
+sentry-sdk==1.39.1
+prometheus-client==0.19.0
+
+# Database ORM
+SQLAlchemy==2.0.23
+
+# Development & Testing
+pytest==7.4.3
+pytest-django==4.7.0
+pytest-asyncio==0.23.2
+factory-boy==3.3.0
+
+# Visualization
+NodeGraphQt==0.8.13
+
+# Code quality
+black==23.12.1
+flake8==6.1.0
+mypy==1.7.1
+pylint==3.0.3
