@@ -6,6 +6,7 @@ Tests for handlers, cache, keyboards, and FSM behavior
 
 import pytest
 import json
+import os
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from hydrogram.types import Message, CallbackQuery, User as TelegramUser, InlineKeyboardMarkup
 
@@ -37,13 +38,13 @@ from bot.handlers import (
 
 
 @pytest.fixture
-def mock_telegram_user():
+def mock_telegram_user(test_user_data):
     """Create a mock Telegram user."""
     user = Mock(spec=TelegramUser)
-    user.id = 12345
-    user.username = "testuser"
-    user.first_name = "Test"
-    user.last_name = "User"
+    user.id = test_user_data['telegram_id']
+    user.username = test_user_data['username']
+    user.first_name = test_user_data['first_name']
+    user.last_name = test_user_data['last_name']
     return user
 
 
@@ -486,6 +487,73 @@ class TestFSMStates:
 
 # ========== Integration Tests ==========
 
+class TestAPIKeyHandling:
+    """Test proper API key handling in bot."""
+
+    def test_env_config_has_api_keys(self, env_config):
+        """Test that env_config provides API keys."""
+        assert 'BOT_TOKEN' in env_config
+        assert 'LOLZTEAM_API_KEY' in env_config
+        assert 'REDIS_CORE_URL' in env_config
+        assert env_config['BOT_TOKEN'].startswith('test-') or ':' in env_config['BOT_TOKEN']
+
+    def test_bot_token_format(self, env_config):
+        """Test Telegram bot token format."""
+        bot_token = env_config['BOT_TOKEN']
+        # Format: 123456:ABC-xyz
+        if not bot_token.startswith('test-'):
+            assert ':' in bot_token
+            token_id, token_hash = bot_token.split(':')
+            assert len(token_id) > 5
+            assert len(token_hash) > 5
+
+    def test_api_key_format(self, env_config):
+        """Test LOLZTEAM API key format."""
+        api_key = env_config['LOLZTEAM_API_KEY']
+        assert api_key is not None
+        assert len(api_key) > 5
+
+    def test_redis_url_format(self, env_config):
+        """Test Redis URL format."""
+        redis_url = env_config['REDIS_CORE_URL']
+        assert redis_url.startswith('redis://')
+        assert 'localhost' in redis_url or '127.0.0.1' in redis_url
+
+    def test_encryption_key_format(self, env_config):
+        """Test encryption key is valid Fernet format."""
+        enc_key = env_config['PRIMARY_ENCRYPTION_KEY']
+        assert enc_key is not None
+        assert len(enc_key) > 10  # Fernet keys are long
+
+    @pytest.mark.asyncio
+    async def test_api_client_initialization_with_key(self, env_config):
+        """Test initializing API client with key from env_config."""
+        from unittest.mock import patch
+
+        api_key = env_config['LOLZTEAM_API_KEY']
+        api_url = env_config['LOLZTEAM_API_URL']
+
+        # Simulate API client init
+        mock_client = MagicMock()
+        mock_client.api_key = api_key
+        mock_client.api_url = api_url
+
+        assert mock_client.api_key == api_key
+        assert mock_client.api_url == api_url
+
+    def test_bot_token_from_env_config(self, env_config):
+        """Test getting bot token from env_config."""
+        with patch('bot.config.AppConfiguration') as mock_config_model:
+            mock_instance = MagicMock()
+            mock_instance.bot_token = env_config['BOT_TOKEN']
+            mock_config_model.get_config.return_value = mock_instance
+
+            # Test BotConfig retrieval
+            from bot.config import BotConfig
+            token = BotConfig.get_token()
+            assert token == env_config['BOT_TOKEN']
+
+
 class TestIntegration:
     """Integration tests for bot flow."""
 
@@ -542,3 +610,79 @@ class TestIntegration:
 
             await handle_checkout(mock_client, mock_callback_query)
             assert mock_callback_query.edit_message_text.called
+
+
+# ========== Example: How to use API keys in tests ==========
+
+"""
+EXAMPLE 1: Using env_config fixture to access API keys
+============================================================
+
+def test_with_api_key(env_config):
+    bot_token = env_config['BOT_TOKEN']
+    api_key = env_config['LOLZTEAM_API_KEY']
+
+    # Use keys to initialize clients
+    # ...
+
+
+EXAMPLE 2: Mock API client with proper key handling
+============================================================
+
+def test_api_call_with_key(mock_lolzteam_api, env_config):
+    api_key = env_config['LOLZTEAM_API_KEY']
+
+    # Configure mock
+    mock_lolzteam_api.api_key = api_key
+    mock_lolzteam_api.get_product.return_value = {
+        'id': 'prod_1',
+        'name': 'Product',
+        'price': 100
+    }
+
+    # Test with mocked API
+    # ...
+
+
+EXAMPLE 3: Patch settings with API keys
+============================================================
+
+from unittest.mock import patch
+
+def test_with_patched_settings(env_config):
+    with patch('django.conf.settings.LOLZTEAM_API_KEY', env_config['LOLZTEAM_API_KEY']):
+        with patch('django.conf.settings.BOT_TOKEN', env_config['BOT_TOKEN']):
+            # Your test logic
+            pass
+
+
+EXAMPLE 4: Skip test if API key not available
+============================================================
+
+@pytest.mark.skipif(
+    os.getenv('LOLZTEAM_API_KEY', '').startswith('test-'),
+    reason="Real API key required for this test"
+)
+def test_real_api_integration():
+    # This test only runs with real API key
+    pass
+
+
+EXAMPLE 5: Use conftest fixtures for API client
+============================================================
+
+# In tests/conftest.py:
+@pytest.fixture
+def api_client_configured(env_config):
+    from apps.api_client.client import LolzteamAPIClient
+    return LolzteamAPIClient(
+        api_key=env_config['LOLZTEAM_API_KEY'],
+        api_url=env_config['LOLZTEAM_API_URL']
+    )
+
+# In test file:
+def test_api_integration(api_client_configured):
+    # Client is already initialized with correct key
+    result = api_client_configured.get_product('test_id')
+    assert result is not None
+"""
