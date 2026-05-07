@@ -568,7 +568,7 @@ def generate_html():
 if __name__ == '__main__':
     print("Generating HTML visualization...")
     html_path = generate_html()
-    print(f"[OK] Generated: {html_path}")
-    print(f"Opening in browser...")
+    print(f"Generated: {html_path}")
+    print("Opening in browser...")
     webbrowser.open(f'file://{os.path.abspath(html_path)}')
-    print("Done!")
+    print("Done")
