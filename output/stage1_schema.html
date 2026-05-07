@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperMarket Этап 1 - Визуализация схемы БД</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .schema-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .model-card {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .model-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .model-card.green { border-top: 4px solid #3cb371; }
+        .model-card.purple { border-top: 4px solid #9370db; }
+        .model-card.red { border-top: 4px solid #dc143c; }
+        .model-card.lime { border-top: 4px solid #adff2f; }
+        .model-card.gold { border-top: 4px solid #ffd700; }
+        .model-card.orange { border-top: 4px solid #ff8c00; }
+        .model-card.blue { border-top: 4px solid #4169e1; }
+
+        .model-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .model-name .badge {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .field-list {
+            list-style: none;
+        }
+
+        .field-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.95em;
+        }
+
+        .field-item:last-child {
+            border-bottom: none;
+        }
+
+        .field-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .field-type {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 3px;
+        }
+
+        .constraint {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin: 2px;
+            color: #555;
+        }
+
+        .constraint.unique { background: #fff3cd; color: #856404; }
+        .constraint.fk { background: #d1ecf1; color: #0c5460; }
+        .constraint.check { background: #d4edda; color: #155724; }
+        .constraint.encrypted { background: #f8d7da; color: #721c24; }
+
+        .relationships {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 2px solid #eee;
+        }
+
+        .relationships h2 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .relationship {
+            background: #f9f9f9;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        .fsm-section {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 2px solid #eee;
+        }
+
+        .fsm-section h2 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .fsm-diagram {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        .state {
+            background: #9370db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .state.error { background: #dc143c; }
+        .state.success { background: #3cb371; }
+
+        .arrow {
+            font-size: 1.5em;
+            color: #667eea;
+        }
+
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .footer {
+            background: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SuperMarket Этап 1</h1>
+            <p>Визуализация схемы базы данных</p>
+        </div>
+
+        <div class="content">
+            <!-- Models Grid -->
+            <div class="schema-grid">
+                <!-- User -->
+                <div class="model-card green">
+                    <div class="model-name">
+                        <span class="badge" style="background: #3cb371;"></span>
+                        User
+                    </div>
+                    <ul class="field-list">
+                        <li class="field-item">
+                            <div class="field-name">telegram_id</div>
+                            <div class="field-type">BigInt <span class="constraint unique">УНИКАЛЬНО</span> <span class="constraint fk">ИНДЕКС</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">email</div>
+                            <div class="field-type">CharField <span class="constraint encrypted">ЗАШИФРОВАН</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">phone</div>
+                            <div class="field-type">CharField <span class="constraint encrypted">ЗАШИФРОВАН</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">balance</div>
+                            <div class="field-type">Decimal <span class="constraint check">≥0</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">role</div>
+                            <div class="field-type">Enum (ПОКУПАТЕЛЬ, АДМИН, МОДЕРАТОР)</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Category -->
+                <div class="model-card gold">
+                    <div class="model-name">
+                        <span class="badge" style="background: #ffd700;"></span>
+                        Category
+                    </div>
+                    <ul class="field-list">
+                        <li class="field-item">
+                            <div class="field-name">name</div>
+                            <div class="field-type">CharField <span class="constraint unique">УНИКАЛЬНО</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">position</div>
+                            <div class="field-type">Int</div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">is_active</div>
+                            <div class="field-type">Boolean</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Product -->
+                <div class="model-card orange">
+                    <div class="model-name">
+                        <span class="badge" style="background: #ff8c00;"></span>
+                        Product
+                    </div>
+                    <ul class="field-list">
+                        <li class="field-item">
+                            <div class="field-name">external_id</div>
+                            <div class="field-type">CharField <span class="constraint unique">УНИКАЛЬНО</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">price</div>
+                            <div class="field-type">Decimal <span class="constraint check">>0</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">quantity_available</div>
+                            <div class="field-type">Int <span class="constraint check">≥0</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">content_template</div>
+                            <div class="field-type">TextField <span class="constraint encrypted">ЗАШИФРОВАН</span></div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Order -->
+                <div class="model-card purple">
+                    <div class="model-name">
+                        <span class="badge" style="background: #9370db;"></span>
+                        Order
+                    </div>
+                    <ul class="field-list">
+                        <li class="field-item">
+                            <div class="field-name">order_id</div>
+                            <div class="field-type">UUID <span class="constraint unique">УНИКАЛЬНО</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">user_id</div>
+                            <div class="field-type">FK <span class="constraint fk">ЗАЩИТА</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">status</div>
+                            <div class="field-type">Enum (Конечный автомат)</div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">total_amount</div>
+                            <div class="field-type">Decimal <span class="constraint check">>0</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">correlation_id</div>
+                            <div class="field-type">UUID</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- OrderItem -->
+                <div class="model-card purple">
+                    <div class="model-name">
+                        <span class="badge" style="background: #9370db;"></span>
+                        OrderItem
+                    </div>
+                    <ul class="field-list">
+                        <li class="field-item">
+                            <div class="field-name">order_id</div>
+                            <div class="field-type">FK <span class="constraint fk">ЗАЩИТА</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">product_id</div>
+                            <div class="field-type">FK <span class="constraint fk">ЗАЩИТА</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">quantity</div>
+                            <div class="field-type">Int <span class="constraint check">>0</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">unit_price</div>
+                            <div class="field-type">Decimal <span class="constraint check">>0</span></div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Transaction -->
+                <div class="model-card red">
+                    <div class="model-name">
+                        <span class="badge" style="background: #dc143c;"></span>
+                        Transaction
+                    </div>
+                    <ul class="field-list">
+                        <li class="field-item">
+                            <div class="field-name">transaction_id</div>
+                            <div class="field-type">UUID <span class="constraint unique">УНИКАЛЬНО</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">idempotency_key</div>
+                            <div class="field-type">String <span class="constraint unique">УНИКАЛЬНО</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">amount</div>
+                            <div class="field-type">Decimal <span class="constraint check">>0</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">type</div>
+                            <div class="field-type">Enum (СПИСАНИЕ, ПОПОЛНЕНИЕ, ВОЗВРАТ)</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- OrderEvent -->
+                <div class="model-card lime">
+                    <div class="model-name">
+                        <span class="badge" style="background: #adff2f;"></span>
+                        OrderEvent
+                    </div>
+                    <ul class="field-list">
+                        <li class="field-item">
+                            <div class="field-name">event_id</div>
+                            <div class="field-type">UUID <span class="constraint fk">ИНДЕКС</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">event_type</div>
+                            <div class="field-type">Enum</div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">correlation_id</div>
+                            <div class="field-type">UUID <span class="constraint fk">ИНДЕКС</span></div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">metadata</div>
+                            <div class="field-type">JSON</div>
+                        </li>
+                        <li class="field-item" style="color: #dc143c; font-weight: bold;">
+                            Только добавление
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- AppConfiguration -->
+                <div class="model-card blue">
+                    <div class="model-name">
+                        <span class="badge" style="background: #4169e1;"></span>
+                        AppConfiguration
+                    </div>
+                    <ul class="field-list">
+                        <li class="field-item">
+                            <div class="field-name">bot_token</div>
+                            <div class="field-type">CharField</div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">lolzteam_api_key</div>
+                            <div class="field-type">CharField</div>
+                        </li>
+                        <li class="field-item">
+                            <div class="field-name">redis_urls</div>
+                            <div class="field-type">CharField</div>
+                        </li>
+                        <li class="field-item" style="color: #4169e1; font-weight: bold;">
+                            Единственный экземпляр
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Relationships -->
+            <div class="relationships">
+                <h2>Связи в базе данных</h2>
+                <div class="relationship">
+                    <strong>Category → Product</strong> | Одна категория содержит много товаров (FK: ЗАЩИТА)
+                </div>
+                <div class="relationship">
+                    <strong>User → Order</strong> | Один пользователь имеет много заказов (FK: ЗАЩИТА)
+                </div>
+                <div class="relationship">
+                    <strong>User → Transaction</strong> | Один пользователь имеет много операций (FK: ЗАЩИТА)
+                </div>
+                <div class="relationship">
+                    <strong>Order → OrderItem</strong> | Один заказ содержит много позиций (FK: ЗАЩИТА)
+                </div>
+                <div class="relationship">
+                    <strong>Product → OrderItem</strong> | Один товар в нескольких заказах (FK: ЗАЩИТА)
+                </div>
+                <div class="relationship">
+                    <strong>Order → Transaction</strong> | Один заказ имеет много операций (FK: ЗАЩИТА)
+                </div>
+                <div class="relationship">
+                    <strong>Order → OrderEvent</strong> | Один заказ имеет историю событий (FK: ЗАЩИТА, Только добавление)
+                </div>
+            </div>
+
+            <!-- FSM Diagram -->
+            <div class="fsm-section">
+                <h2>Жизненный цикл заказа</h2>
+                <div class="fsm-diagram">
+                    <div class="state">СОЗДАН</div>
+                    <div class="arrow">→</div>
+                    <div class="state">ЗАРЕЗЕРВИРОВАН</div>
+                    <div class="arrow">→</div>
+                    <div class="state">ОПЛАЧЕН</div>
+                    <div class="arrow">→</div>
+                    <div class="state">ДОСТАВЛЕН</div>
+                    <div class="arrow">→</div>
+                    <div class="state success">ЗАВЕРШЕН</div>
+                </div>
+                <div style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+                    <p><strong>Состояния ошибок:</strong></p>
+                    <p style="margin-top: 10px;">Любое состояние → <span class="state error">ОШИБКА</span> или <span class="state error">ОТМЕНЕН</span></p>
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #3cb371;"></div>
+                    <span>Управление пользователями</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #9370db;"></div>
+                    <span>Обработка заказов</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #dc143c;"></div>
+                    <span>Финансовые операции</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #adff2f;"></div>
+                    <span>Аудит и соответствие</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ffd700;"></div>
+                    <span>Каталог товаров</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4169e1;"></div>
+                    <span>Конфигурация</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>SuperMarket Этап 1 - Визуализация схемы БД</p>
+            <p>Создано: 2026-05-07 | Версия: v1.0-stage1</p>
+        </div>
+    </div>
+</body>
+</html>
