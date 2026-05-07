@@ -11,13 +11,10 @@ import sys
 from pathlib import Path
 
 try:
-    from nodegraphqt import NodeGraph, BaseNode
+    from NodeGraphQt import NodeGraph, BaseNode
 except ImportError:
-    try:
-        from NodeGraphQt import NodeGraph, BaseNode
-    except ImportError:
-        print("Error: NodeGraphQt not installed. Install with: pip install NodeGraphQt PyQt5")
-        sys.exit(1)
+    print("Error: NodeGraphQt not installed. Install with: pip install NodeGraphQt PyQt5")
+    sys.exit(1)
 
 
 class ModelNode(BaseNode):
