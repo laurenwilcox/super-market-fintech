@@ -141,7 +141,7 @@ def create_graph():
     """Create and configure the node graph."""
     graph = NodeGraph()
 
-    graph.set_title('SuperMarket Stage 1: Database Schema (ER-Diagram)')
+    graph.set_title('SuperMarket Этап 1: Схема БД (ER-диаграмма)')
 
     # Create nodes
     user_node = graph.create_node(UserNode, name='User', pos=(50, 200))
@@ -186,15 +186,15 @@ def create_graph():
 
     # Add annotations
     graph.add_comment(
-        'Database Schema - Stage 1',
+        'Схема БД - Этап 1',
         pos=(50, 700),
-        text='Green: Users | Purple: Orders | Red: Transactions | Lime: Events | Gold: Catalog'
+        text='Зеленый: Пользователи | Фиолетовый: Заказы | Красный: Операции | Лаймовый: События | Золотой: Каталог'
     )
     graph.add_comment(
-        'Key Features',
+        'Ключевые особенности',
         pos=(350, 700),
-        text='PROTECT: All foreign keys | Constraints: price>0, balance≥0, amount>0\n'
-             'Encryption: Email, Phone, Content | Idempotency: Transactions | Append-only: Events'
+        text='ЗАЩИТА: Все внешние ключи | Ограничения: цена>0, баланс≥0, сумма>0\n'
+             'Шифрование: Email, Phone, Content | Идемпотентность: Операции | Только добавление: События'
     )
 
     graph.show()
@@ -202,12 +202,12 @@ def create_graph():
 
 
 if __name__ == '__main__':
-    print("Launching Stage 1 Database Visualization...")
-    print("Features shown:")
-    print("  - All database models and their relationships")
-    print("  - Field types and constraints")
-    print("  - Foreign key relationships (PROTECT)")
-    print("  - Color coding: Users (green), Orders (purple), Transactions (red), Events (lime)")
+    print("Запуск визуализации БД Этап 1...")
+    print("Показанные возможности:")
+    print("  - Все модели БД и их связи")
+    print("  - Типы полей и ограничения")
+    print("  - Отношения внешних ключей (ЗАЩИТА)")
+    print("  - Цветовое кодирование: Пользователи (зеленый), Заказы (фиолетовый), Операции (красный), События (лаймовый)")
     print()
 
     graph = create_graph()

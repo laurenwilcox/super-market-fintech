@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 Generate interactive HTML visualization of Stage 1 database schema.
 Creates an HTML file that can be opened in any browser.
@@ -11,6 +12,8 @@ Usage:
 import webbrowser
 import os
 from pathlib import Path
+import io
+import sys
 
 
 def generate_html():
@@ -21,7 +24,7 @@ def generate_html():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperMarket Stage 1 - Database Schema Visualization</title>
+    <title>SuperMarket Этап 1 - Визуализация схемы БД</title>
     <style>
         * {
             margin: 0;
@@ -247,8 +250,8 @@ def generate_html():
 <body>
     <div class="container">
         <div class="header">
-            <h1>🗄️ SuperMarket Stage 1</h1>
-            <p>Database Schema Visualization</p>
+            <h1>SuperMarket Этап 1</h1>
+            <p>Визуализация схемы базы данных</p>
         </div>
 
         <div class="content">
@@ -263,15 +266,15 @@ def generate_html():
                     <ul class="field-list">
                         <li class="field-item">
                             <div class="field-name">telegram_id</div>
-                            <div class="field-type">BigInt <span class="constraint unique">UNIQUE</span> <span class="constraint fk">INDEXED</span></div>
+                            <div class="field-type">BigInt <span class="constraint unique">УНИКАЛЬНО</span> <span class="constraint fk">ИНДЕКС</span></div>
                         </li>
                         <li class="field-item">
                             <div class="field-name">email</div>
-                            <div class="field-type">CharField <span class="constraint encrypted">ENCRYPTED</span></div>
+                            <div class="field-type">CharField <span class="constraint encrypted">ЗАШИФРОВАН</span></div>
                         </li>
                         <li class="field-item">
                             <div class="field-name">phone</div>
-                            <div class="field-type">CharField <span class="constraint encrypted">ENCRYPTED</span></div>
+                            <div class="field-type">CharField <span class="constraint encrypted">ЗАШИФРОВАН</span></div>
                         </li>
                         <li class="field-item">
                             <div class="field-name">balance</div>
@@ -279,7 +282,7 @@ def generate_html():
                         </li>
                         <li class="field-item">
                             <div class="field-name">role</div>
-                            <div class="field-type">Enum (CUSTOMER, ADMIN, MODERATOR)</div>
+                            <div class="field-type">Enum (ПОКУПАТЕЛЬ, АДМИН, МОДЕРАТОР)</div>
                         </li>
                     </ul>
                 </div>
@@ -293,7 +296,7 @@ def generate_html():
                     <ul class="field-list">
                         <li class="field-item">
                             <div class="field-name">name</div>
-                            <div class="field-type">CharField <span class="constraint unique">UNIQUE</span></div>
+                            <div class="field-type">CharField <span class="constraint unique">УНИКАЛЬНО</span></div>
                         </li>
                         <li class="field-item">
                             <div class="field-name">position</div>
@@ -315,7 +318,7 @@ def generate_html():
                     <ul class="field-list">
                         <li class="field-item">
                             <div class="field-name">external_id</div>
-                            <div class="field-type">CharField <span class="constraint unique">UNIQUE</span></div>
+                            <div class="field-type">CharField <span class="constraint unique">УНИКАЛЬНО</span></div>
                         </li>
                         <li class="field-item">
                             <div class="field-name">price</div>
@@ -327,7 +330,7 @@ def generate_html():
                         </li>
                         <li class="field-item">
                             <div class="field-name">content_template</div>
-                            <div class="field-type">TextField <span class="constraint encrypted">ENCRYPTED</span></div>
+                            <div class="field-type">TextField <span class="constraint encrypted">ЗАШИФРОВАН</span></div>
                         </li>
                     </ul>
                 </div>
@@ -341,15 +344,15 @@ def generate_html():
                     <ul class="field-list">
                         <li class="field-item">
                             <div class="field-name">order_id</div>
-                            <div class="field-type">UUID <span class="constraint unique">UNIQUE</span></div>
+                            <div class="field-type">UUID <span class="constraint unique">УНИКАЛЬНО</span></div>
                         </li>
                         <li class="field-item">
                             <div class="field-name">user_id</div>
-                            <div class="field-type">FK <span class="constraint fk">PROTECT</span></div>
+                            <div class="field-type">FK <span class="constraint fk">ЗАЩИТА</span></div>
                         </li>
                         <li class="field-item">
                             <div class="field-name">status</div>
-                            <div class="field-type">Enum (FSM)</div>
+                            <div class="field-type">Enum (Конечный автомат)</div>
                         </li>
                         <li class="field-item">
                             <div class="field-name">total_amount</div>
@@ -371,11 +374,11 @@ def generate_html():
                     <ul class="field-list">
                         <li class="field-item">
                             <div class="field-name">order_id</div>
-                            <div class="field-type">FK <span class="constraint fk">PROTECT</span></div>
+                            <div class="field-type">FK <span class="constraint fk">ЗАЩИТА</span></div>
                         </li>
                         <li class="field-item">
                             <div class="field-name">product_id</div>
-                            <div class="field-type">FK <span class="constraint fk">PROTECT</span></div>
+                            <div class="field-type">FK <span class="constraint fk">ЗАЩИТА</span></div>
                         </li>
                         <li class="field-item">
                             <div class="field-name">quantity</div>
@@ -397,11 +400,11 @@ def generate_html():
                     <ul class="field-list">
                         <li class="field-item">
                             <div class="field-name">transaction_id</div>
-                            <div class="field-type">UUID <span class="constraint unique">UNIQUE</span></div>
+                            <div class="field-type">UUID <span class="constraint unique">УНИКАЛЬНО</span></div>
                         </li>
                         <li class="field-item">
                             <div class="field-name">idempotency_key</div>
-                            <div class="field-type">String <span class="constraint unique">UNIQUE</span></div>
+                            <div class="field-type">String <span class="constraint unique">УНИКАЛЬНО</span></div>
                         </li>
                         <li class="field-item">
                             <div class="field-name">amount</div>
@@ -409,7 +412,7 @@ def generate_html():
                         </li>
                         <li class="field-item">
                             <div class="field-name">type</div>
-                            <div class="field-type">Enum (DEBIT, CREDIT, REFUND)</div>
+                            <div class="field-type">Enum (СПИСАНИЕ, ПОПОЛНЕНИЕ, ВОЗВРАТ)</div>
                         </li>
                     </ul>
                 </div>
@@ -423,7 +426,7 @@ def generate_html():
                     <ul class="field-list">
                         <li class="field-item">
                             <div class="field-name">event_id</div>
-                            <div class="field-type">UUID <span class="constraint fk">INDEXED</span></div>
+                            <div class="field-type">UUID <span class="constraint fk">ИНДЕКС</span></div>
                         </li>
                         <li class="field-item">
                             <div class="field-name">event_type</div>
@@ -431,14 +434,14 @@ def generate_html():
                         </li>
                         <li class="field-item">
                             <div class="field-name">correlation_id</div>
-                            <div class="field-type">UUID <span class="constraint fk">INDEXED</span></div>
+                            <div class="field-type">UUID <span class="constraint fk">ИНДЕКС</span></div>
                         </li>
                         <li class="field-item">
                             <div class="field-name">metadata</div>
                             <div class="field-type">JSON</div>
                         </li>
                         <li class="field-item" style="color: #dc143c; font-weight: bold;">
-                            ⚠️ APPEND-ONLY
+                            Только добавление
                         </li>
                     </ul>
                 </div>
@@ -463,7 +466,7 @@ def generate_html():
                             <div class="field-type">CharField</div>
                         </li>
                         <li class="field-item" style="color: #4169e1; font-weight: bold;">
-                            🔐 SINGLETON
+                            Единственный экземпляр
                         </li>
                     </ul>
                 </div>
@@ -471,47 +474,47 @@ def generate_html():
 
             <!-- Relationships -->
             <div class="relationships">
-                <h2>📊 Database Relationships</h2>
+                <h2>Связи в базе данных</h2>
                 <div class="relationship">
-                    <strong>Category → Product</strong> | One category has many products (FK: PROTECT)
+                    <strong>Category → Product</strong> | Одна категория содержит много товаров (FK: ЗАЩИТА)
                 </div>
                 <div class="relationship">
-                    <strong>User → Order</strong> | One user has many orders (FK: PROTECT)
+                    <strong>User → Order</strong> | Один пользователь имеет много заказов (FK: ЗАЩИТА)
                 </div>
                 <div class="relationship">
-                    <strong>User → Transaction</strong> | One user has many transactions (FK: PROTECT)
+                    <strong>User → Transaction</strong> | Один пользователь имеет много операций (FK: ЗАЩИТА)
                 </div>
                 <div class="relationship">
-                    <strong>Order → OrderItem</strong> | One order has many items (FK: PROTECT)
+                    <strong>Order → OrderItem</strong> | Один заказ содержит много позиций (FK: ЗАЩИТА)
                 </div>
                 <div class="relationship">
-                    <strong>Product → OrderItem</strong> | One product in many orders (FK: PROTECT)
+                    <strong>Product → OrderItem</strong> | Один товар в нескольких заказах (FK: ЗАЩИТА)
                 </div>
                 <div class="relationship">
-                    <strong>Order → Transaction</strong> | One order has many transactions (FK: PROTECT)
+                    <strong>Order → Transaction</strong> | Один заказ имеет много операций (FK: ЗАЩИТА)
                 </div>
                 <div class="relationship">
-                    <strong>Order → OrderEvent</strong> | One order has many events (FK: PROTECT, Append-only)
+                    <strong>Order → OrderEvent</strong> | Один заказ имеет историю событий (FK: ЗАЩИТА, Только добавление)
                 </div>
             </div>
 
             <!-- FSM Diagram -->
             <div class="fsm-section">
-                <h2>🎭 Order State Machine (FSM)</h2>
+                <h2>Жизненный цикл заказа</h2>
                 <div class="fsm-diagram">
-                    <div class="state">CREATED</div>
+                    <div class="state">СОЗДАН</div>
                     <div class="arrow">→</div>
-                    <div class="state">RESERVED</div>
+                    <div class="state">ЗАРЕЗЕРВИРОВАН</div>
                     <div class="arrow">→</div>
-                    <div class="state">PAID</div>
+                    <div class="state">ОПЛАЧЕН</div>
                     <div class="arrow">→</div>
-                    <div class="state">DELIVERED</div>
+                    <div class="state">ДОСТАВЛЕН</div>
                     <div class="arrow">→</div>
-                    <div class="state success">COMPLETED</div>
+                    <div class="state success">ЗАВЕРШЕН</div>
                 </div>
                 <div style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
-                    <p><strong>Error paths:</strong></p>
-                    <p style="margin-top: 10px;">Any state → <span class="state error">FAILED</span> or <span class="state error">CANCELLED</span></p>
+                    <p><strong>Состояния ошибок:</strong></p>
+                    <p style="margin-top: 10px;">Любое состояние → <span class="state error">ОШИБКА</span> или <span class="state error">ОТМЕНЕН</span></p>
                 </div>
             </div>
 
@@ -519,34 +522,34 @@ def generate_html():
             <div class="legend">
                 <div class="legend-item">
                     <div class="legend-color" style="background: #3cb371;"></div>
-                    <span>User Management</span>
+                    <span>Управление пользователями</span>
                 </div>
                 <div class="legend-item">
                     <div class="legend-color" style="background: #9370db;"></div>
-                    <span>Order Processing</span>
+                    <span>Обработка заказов</span>
                 </div>
                 <div class="legend-item">
                     <div class="legend-color" style="background: #dc143c;"></div>
-                    <span>Financial Operations</span>
+                    <span>Финансовые операции</span>
                 </div>
                 <div class="legend-item">
                     <div class="legend-color" style="background: #adff2f;"></div>
-                    <span>Audit & Compliance</span>
+                    <span>Аудит и соответствие</span>
                 </div>
                 <div class="legend-item">
                     <div class="legend-color" style="background: #ffd700;"></div>
-                    <span>Product Catalog</span>
+                    <span>Каталог товаров</span>
                 </div>
                 <div class="legend-item">
                     <div class="legend-color" style="background: #4169e1;"></div>
-                    <span>Configuration</span>
+                    <span>Конфигурация</span>
                 </div>
             </div>
         </div>
 
         <div class="footer">
-            <p>SuperMarket Stage 1 - Database Schema Visualization</p>
-            <p>Generated: 2026-05-07 | Version: v1.0-stage1</p>
+            <p>SuperMarket Этап 1 - Визуализация схемы БД</p>
+            <p>Создано: 2026-05-07 | Версия: v1.0-stage1</p>
         </div>
     </div>
 </body>
@@ -566,7 +569,8 @@ def generate_html():
 
 
 if __name__ == '__main__':
-    print("Generating HTML visualization...")
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    print("Creating HTML visualization...")
     html_path = generate_html()
     print(f"Generated: {html_path}")
     print("Opening in browser...")
